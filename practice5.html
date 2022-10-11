@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>practice page</title>
+    <style>
+      #calc-display {
+        display: inline-block;
+        background-color: lightgray;
+        width: 500px;
+        height: 70px;
+        padding: 8px;
+        text-align: right;
+        font-size: 60px;
+        font-weight: normal;
+        margin: auto;
+      }
+
+      #btn-container {
+        display: grid;
+        width: 500px;
+        border: 1px solid lightgray;
+        padding: 8px;
+        grid-template-columns: 25% 25% 25% 25%;
+      }
+
+      div > button {
+        padding: 4px;
+        font-size: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h2 id="practice">this is a practice page</h2>
+      <!-- text between -->
+      <ul id="ingredient-list">
+        <li>onion</li>
+        <li>salt</li>
+        <li>pepper</li>
+        <li>tomatoes</li>
+      </ul>
+    </div>
+    <h2 id="calc-display"></h2>
+
+    <div id="btn-container">
+      <button id="btn%">&#37;</button>
+      <button id="btnC">c</button>
+      <button id="btnBackArrow">&#8592;</button>
+      <button id="btnDivision">&#247;</button>
+      <button id="btn7" class="numeric">7</button>
+      <button id="btn8" class="numeric">8</button>
+      <button id="btn9" class="numeric">9</button>
+      <button id="btnMultiply">&#215;</button>
+      <button id="btn4" class="numeric">4</button>
+      <button id="btn5" class="numeric">5</button>
+      <button id="btn6" class="numeric">6</button>
+      <button id="btnMinus">&#8722;</button>
+      <button id="btn1" class="numeric">1</button>
+      <button id="btn2" class="numeric">2</button>
+      <button id="btn3" class="numeric">3</button>
+      <button id="btnPlus">&#43;</button>
+      <button id="btnPlusMinus">+/-</button>
+      <button id="btn0" class="numeric">0</button>
+      <button id="btnDot" class="dot">.</button>
+      <button id="btnEqual">&#61;</button>
+    </div>
+
+    <script>
+      // let newListItem = document.createElement("li");
+      // newListItem.innerText = "spices";
+      // let list = document.getElementById("ingredient-list");
+      // list.append(newListItem);
+      // newListItem.setAttribute("style", "color: blue");
+      // console.log(list.childNodes);
+      // console.log(list.children[0]);
+      // console.log(document.getElementsByTagName("li"));
+      // list.firstChild.nextSibling.style.color = "green";
+      // list.childNodes[1].innerText = "Chicken";
+      // list.lastElementChild.style.color = "red";
+      // let container = document.querySelector("#container");
+      // console.log(container.childNodes);
+      // list.lastElementChild.addEventListener("click", (e) => {
+      //   e.target.innerText = "clicked";
+      //   list.lastElementChild.style.color = "lightGreen";
+      // });
+
+      let innerCalculator = 0;
+      let innerTempMemory = [];
+      let result;
+      let arithmeticBtnsFirstClick = true; //Flag set to prevent arithmetic operators (+ - / *) from  giving results on multiple clicks
+      let equalBtnFirstClick = true; // Flag set for equal operator (=) increment on multiple clicks
+      let z; // Random variable that stores values to display when equal button is clicked
+      let previousArithmeticBtnClicked = "";
+      let equalBtnClicked = false;
+      let numericBtnsClicked = false;
+      let percentBtnClicked = false;
+      let percentBtnFirstClick = true;
+
+      const display = document.querySelector("#calc-display");
+      window.addEventListener("load", () => {
+        display.innerText = 0;
+      });
+      let container = document.querySelector("#btn-container");
+      container.addEventListener("click", (e) => {
+        let btnValue = e.target.innerText;
+
+        if (result == undefined) {
+          if (e.target.classList.contains("numeric")) {
+            if (display.innerText == "0") {
+              display.innerText = btnValue;
+            } else if (display.innerText == "0.") {
+              display.innerText += btnValue;
+            } else if (display.innerText.length < 16) {
+              display.innerText += btnValue;
+            } else {
+              display.innerText = display.innerText;
+            }
+          }
+          if (e.target.classList.contains("dot")) {
+          }
+        } else {
+          display.innerText = btnValue;
+        }
+
+        console.log(btnValue);
+      });
+    </script>
+  </body>
+</html>
