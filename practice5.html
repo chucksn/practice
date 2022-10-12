@@ -46,26 +46,26 @@
     <h2 id="calc-display"></h2>
 
     <div id="btn-container">
-      <button id="btn%">&#37;</button>
-      <button id="btnC">c</button>
-      <button id="btnBackArrow">&#8592;</button>
-      <button id="btnDivision">&#247;</button>
+      <button id="btn%" class="%operator">&#37;</button>
+      <button id="btnC" class="clear">c</button>
+      <button id="btnBack" class="back">&#8592;</button>
+      <button id="btnDivision" class="operator">&#247;</button>
       <button id="btn7" class="numeric">7</button>
       <button id="btn8" class="numeric">8</button>
       <button id="btn9" class="numeric">9</button>
-      <button id="btnMultiply">&#215;</button>
+      <button id="btnMultiply" class="operator">&#215;</button>
       <button id="btn4" class="numeric">4</button>
       <button id="btn5" class="numeric">5</button>
       <button id="btn6" class="numeric">6</button>
-      <button id="btnMinus">&#8722;</button>
+      <button id="btnMinus" class="operator">&#8722;</button>
       <button id="btn1" class="numeric">1</button>
       <button id="btn2" class="numeric">2</button>
       <button id="btn3" class="numeric">3</button>
-      <button id="btnPlus">&#43;</button>
+      <button id="btnPlus" class="operator">&#43;</button>
       <button id="btnPlusMinus">+/-</button>
       <button id="btn0" class="numeric">0</button>
       <button id="btnDot" class="dot">.</button>
-      <button id="btnEqual">&#61;</button>
+      <button id="btnEqual" class="=operator">&#61;</button>
     </div>
 
     <script>
@@ -98,6 +98,10 @@
       let numericBtnsClicked = false;
       let percentBtnClicked = false;
       let percentBtnFirstClick = true;
+      let plusClicked = false;
+      let minusClicked = false;
+      let multiplyClicked = false;
+      let divideClicked = false;
 
       const display = document.querySelector("#calc-display");
       window.addEventListener("load", () => {
@@ -106,6 +110,20 @@
       let container = document.querySelector("#btn-container");
       container.addEventListener("click", (e) => {
         let btnValue = e.target.innerText;
+
+        // Numeric
+        if (e.target.classList.contains("numeric")) {
+          arithmeticBtnsFirstClick = true;
+          equalBtnFirstClick = true;
+          numericBtnsClicked = true;
+          plusClicked = false;
+          minusClicked = false;
+          multiplyClicked = false;
+          divideClicked = false;
+          if (equalBtnClicked && numericBtnsClicked) {
+            innerTempMemory = [];
+          }
+        }
 
         if (result == undefined) {
           if (e.target.classList.contains("numeric")) {
@@ -120,9 +138,507 @@
             }
           }
           if (e.target.classList.contains("dot")) {
+            if (display.innerText.includes(".")) {
+              display.innerText = display.innerText;
+            } else if (display.innerText.length < 16) {
+              display.innerText += btnValue;
+            } else {
+              display.innerText = display.innerText;
+            }
           }
         } else {
-          display.innerText = btnValue;
+          if (e.target.classList.contains("numeric")) {
+            display.innerText = btnValue;
+          }
+          if (e.target.classList.contains("dot")) {
+            display.innerText = "0.";
+          }
+          result = undefined;
+        }
+
+        if (e.target.classList.contains("back")) {
+          let len = display.innerText.length;
+
+          if (equalBtnClicked) {
+            display.innerText = display.innerText;
+          } else {
+            display.innerText = display.innerText.slice(0, len - 1);
+          }
+          if (display.innerText == "") {
+            display.innerText = 0;
+          }
+        }
+
+        if (e.target.classList.contains("clear")) {
+          display.innerText = 0;
+          innerCalculator = 0;
+          innerTempMemory = [];
+        }
+
+        // Operators
+        if (e.target.classList.contains("%operator")) {
+          if (percentBtnFirstClick) {
+            result = 0;
+            if (display.innerText == "0") {
+              display.innerText = 0;
+            } else {
+              let percentCalc = Number(display.innerText) / 100;
+              result = percentCalc;
+              innerTempMemory.push(result);
+              display.innerText = result;
+
+              arithmeticBtnsFirstClick = true;
+            }
+          } else {
+            display.innerText = display.innerText;
+          }
+          equalBtnFirstClick = true;
+          percentBtnFirstClick = false;
+          percentBtnClicked = true;
+          // if block below prevents displayed result from exceeding display area
+          if (display.innerText.length > 16) {
+            display.innerText = Number(display.innerText).toExponential(4);
+          } else {
+            display.innerText = display.innerText;
+          }
+        }
+
+        let id = e.target.getAttribute("id");
+        if (e.target.classList.contains("operator")) {
+          if (numericBtnsClicked && equalBtnClicked) {
+            innerCalculator = 0;
+            innerTempMemory = [];
+            equalBtnClicked = false;
+            arithmeticBtnsFirstClick = true;
+          } else if (
+            previousArithmeticBtnClicked == "plus" &&
+            !equalBtnClicked &&
+            !plusClicked
+          ) {
+            innerTempMemory.push(Number(display.innerText));
+            innerCalculator += innerTempMemory[innerTempMemory.length - 1];
+            display.innerText = innerCalculator;
+            innerTempMemory = [];
+            innerTempMemory.push(innerCalculator);
+            arithmeticBtnsFirstClick = false;
+            equalBtnFirstClick = true;
+            result = 0;
+          } else if (
+            previousArithmeticBtnClicked == "minus" &&
+            !equalBtnClicked &&
+            !minusClicked
+          ) {
+            innerTempMemory.push(Number(display.innerText));
+            innerCalculator -= innerTempMemory[innerTempMemory.length - 1];
+            display.innerText = innerCalculator;
+            innerTempMemory = [];
+            innerTempMemory.push(innerCalculator);
+            arithmeticBtnsFirstClick = false;
+            equalBtnFirstClick = true;
+            result = 0;
+          } else if (
+            previousArithmeticBtnClicked == "divide" &&
+            !equalBtnClicked &&
+            !divideClicked
+          ) {
+            innerTempMemory.push(Number(display.innerText));
+            innerCalculator /= innerTempMemory[innerTempMemory.length - 1];
+            display.innerText = innerCalculator;
+            innerTempMemory = [];
+            innerTempMemory.push(innerCalculator);
+            arithmeticBtnsFirstClick = false;
+            equalBtnFirstClick = true;
+            result = 0;
+          } else if (
+            previousArithmeticBtnClicked == "multiply" &&
+            !equalBtnClicked &&
+            !multiplyClicked
+          ) {
+            innerTempMemory.push(Number(display.innerText));
+            innerCalculator *= innerTempMemory[innerTempMemory.length - 1];
+            display.innerText = innerCalculator;
+            innerTempMemory = [];
+            innerTempMemory.push(innerCalculator);
+            arithmeticBtnsFirstClick = false;
+            equalBtnFirstClick = true;
+            result = 0;
+          } else {
+            result = 0;
+          }
+
+          if (id == "btnPlus") {
+            if (arithmeticBtnsFirstClick) {
+              result = 0;
+              if (display.innerText == "0") {
+                display.innerText = 0;
+              } else {
+                innerTempMemory.push(Number(display.innerText));
+
+                innerCalculator += innerTempMemory[innerTempMemory.length - 1];
+                result = innerCalculator;
+
+                display.innerText = result;
+
+                arithmeticBtnsFirstClick = false;
+              }
+            } else {
+              display.innerText = display.innerText;
+            }
+            equalBtnFirstClick = true;
+            previousArithmeticBtnClicked = "plus";
+            plusClicked = true;
+          }
+
+          if (id == "btnMinus") {
+            if (arithmeticBtnsFirstClick) {
+              result = 0;
+              if (display.innerText == "0") {
+                display.innerText = 0;
+              } else if (innerCalculator == 0) {
+                innerTempMemory.push(Number(display.innerText));
+                innerCalculator = innerTempMemory[innerTempMemory.length - 1];
+              } else {
+                innerTempMemory.push(Number(display.innerText));
+
+                innerCalculator -= innerTempMemory[innerTempMemory.length - 1];
+                result = innerCalculator;
+
+                display.innerText = result;
+
+                arithmeticBtnsFirstClick = false;
+              }
+            } else {
+              display.innerText = display.innerText;
+            }
+            equalBtnFirstClick = true;
+            minusClicked = true;
+            previousArithmeticBtnClicked = "minus";
+          }
+
+          if (id == "btnMultiply") {
+            if (innerCalculator == 0) {
+              innerCalculator = 1;
+            }
+            if (arithmeticBtnsFirstClick) {
+              result = 0;
+              if (display.innerText == "0") {
+                display.innerText = 0;
+              } else {
+                innerTempMemory.push(Number(display.innerText));
+
+                innerCalculator *= innerTempMemory[innerTempMemory.length - 1];
+                result = innerCalculator;
+                result = Number(result.toFixed(5));
+
+                display.innerText = result;
+
+                arithmeticBtnsFirstClick = false;
+              }
+            } else {
+              display.innerText = display.innerText;
+            }
+            equalBtnFirstClick = true;
+            multiplyClicked = true;
+            previousArithmeticBtnClicked = "multiply";
+          }
+
+          if (id == "btnDivision") {
+            if (arithmeticBtnsFirstClick) {
+              result = 0;
+              if (display.innerText == "0") {
+                display.innerText = 0;
+              } else if (innerCalculator == 0) {
+                innerTempMemory.push(Number(display.innerText));
+                innerCalculator = innerTempMemory[innerTempMemory.length - 1];
+              } else {
+                innerTempMemory.push(Number(display.innerText));
+
+                innerCalculator /= innerTempMemory[innerTempMemory.length - 1];
+                result = innerCalculator;
+
+                display.innerText = result;
+
+                arithmeticBtnsFirstClick = false;
+              }
+            } else {
+              display.innerText = display.innerText;
+            }
+            equalBtnFirstClick = true;
+            divideClicked = true;
+            previousArithmeticBtnClicked = "divide";
+          }
+
+          // if block below prevents displayed result from exceeding display area
+          if (display.innerText.length > 16) {
+            display.innerText = Number(display.innerText).toExponential(4);
+          } else {
+            display.innerText = display.innerText;
+          }
+        }
+
+        if (e.target.classList.contains("=operator")) {
+          equalBtnClicked = true;
+
+          if (
+            previousArithmeticBtnClicked == "plus" &&
+            equalBtnClicked &&
+            !percentBtnClicked
+          ) {
+            if (innerCalculator == 0) {
+              display.innerHTML = display.innerHTML;
+
+              arithmeticBtnsFirstClick = true;
+            } else if (equalBtnFirstClick) {
+              innerTempMemory.push(Number(display.innerHTML));
+
+              z = innerCalculator += Number(display.innerHTML);
+              result = z;
+              result = Number(result.toFixed(5));
+              display.innerHTML = result;
+              result = 0;
+
+              equalBtnFirstClick = false;
+              arithmeticBtnsFirstClick = false;
+            } else {
+              z += innerTempMemory[innerTempMemory.length - 1];
+              result = z;
+              result = Number(result.toFixed(5));
+
+              display.innerHTML = result;
+
+              innerCalculator = result;
+
+              arithmeticBtnsFirstClick = false;
+            }
+          } else if (
+            previousArithmeticBtnClicked == "multiply" &&
+            equalBtnClicked &&
+            !percentBtnClicked
+          ) {
+            if (innerCalculator == 0) {
+              display.innerHTML = display.innerHTML;
+
+              arithmeticBtnsFirstClick = true;
+            } else if (equalBtnFirstClick) {
+              innerTempMemory.push(Number(display.innerHTML));
+
+              z = innerCalculator *= Number(display.innerHTML);
+              result = z;
+              result = Number(result.toFixed(5));
+              display.innerHTML = result;
+              result = 0;
+
+              equalBtnFirstClick = false;
+              arithmeticBtnsFirstClick = false;
+            } else {
+              z *= innerTempMemory[innerTempMemory.length - 1];
+              result = z;
+              result = Number(result.toFixed(5));
+
+              display.innerHTML = result;
+              innerCalculator = result;
+
+              arithmeticBtnsFirstClick = false;
+            }
+          } else if (
+            previousArithmeticBtnClicked == "minus" &&
+            equalBtnClicked &&
+            !percentBtnClicked
+          ) {
+            if (innerCalculator == 0) {
+              display.innerHTML = display.innerHTML;
+
+              arithmeticBtnsFirstClick = true;
+            } else if (equalBtnFirstClick) {
+              innerTempMemory.push(Number(display.innerHTML));
+
+              z = innerCalculator -= Number(display.innerHTML);
+              result = z;
+              result = Number(result.toFixed(5));
+              display.innerHTML = result;
+
+              result = 0;
+
+              equalBtnFirstClick = false;
+              arithmeticBtnsFirstClick = false;
+            } else {
+              z -= innerTempMemory[innerTempMemory.length - 1];
+              result = z;
+              result = Number(result.toFixed(5));
+
+              display.innerHTML = result;
+
+              innerCalculator = result;
+
+              arithmeticBtnsFirstClick = false;
+            }
+          } else if (
+            previousArithmeticBtnClicked == "divide" &&
+            equalBtnClicked &&
+            !percentBtnClicked
+          ) {
+            if (innerCalculator == 0) {
+              display.innerHTML = display.innerHTML;
+
+              arithmeticBtnsFirstClick = true;
+            } else if (equalBtnFirstClick) {
+              innerTempMemory.push(Number(display.innerHTML));
+
+              z = innerCalculator /= Number(display.innerHTML);
+              result = z;
+              result = Number(result.toFixed(5));
+              display.innerHTML = result;
+
+              result = 0;
+              equalBtnFirstClick = false;
+              arithmeticBtnsFirstClick = false;
+            } else {
+              z /= innerTempMemory[innerTempMemory.length - 1];
+              result = z;
+              result = Number(result.toFixed(5));
+
+              display.innerHTML = result;
+
+              innerCalculator = result;
+
+              arithmeticBtnsFirstClick = false;
+            }
+          } else if (
+            previousArithmeticBtnClicked == "divide" &&
+            equalBtnClicked &&
+            percentBtnClicked
+          ) {
+            if (innerCalculator == 0) {
+              display.innerHTML = display.innerHTML;
+
+              arithmeticBtnsFirstClick = true;
+            } else if (equalBtnFirstClick) {
+              innerTempMemory.push(Number(display.innerHTML));
+
+              z = innerCalculator /= Number(display.innerHTML);
+              result = z;
+              result = Number(result.toFixed(5));
+              display.innerHTML = result;
+
+              result = 0;
+
+              equalBtnFirstClick = false;
+              arithmeticBtnsFirstClick = false;
+            } else {
+              z /= innerTempMemory[innerTempMemory.length - 1];
+              result = z;
+              result = Number(result.toFixed(5));
+
+              display.innerHTML = result;
+
+              innerCalculator = result;
+
+              arithmeticBtnsFirstClick = false;
+            }
+          } else if (
+            previousArithmeticBtnClicked == "plus" &&
+            equalBtnClicked &&
+            percentBtnClicked
+          ) {
+            if (innerCalculator == 0) {
+              display.innerHTML = display.innerHTML;
+
+              arithmeticBtnsFirstClick = true;
+            } else if (equalBtnFirstClick) {
+              innerTempMemory.push(Number(display.innerHTML));
+
+              z = innerCalculator += Number(display.innerHTML);
+              result = z;
+              result = Number(result.toFixed(5));
+              display.innerHTML = result;
+
+              result = 0;
+
+              equalBtnFirstClick = false;
+              arithmeticBtnsFirstClick = false;
+            } else {
+              z += innerTempMemory[innerTempMemory.length - 1];
+              result = z;
+              result = Number(result.toFixed(5));
+
+              display.innerHTML = result;
+
+              innerCalculator = result;
+
+              arithmeticBtnsFirstClick = false;
+            }
+          } else if (
+            previousArithmeticBtnClicked == "multiply" &&
+            equalBtnClicked &&
+            percentBtnClicked
+          ) {
+            if (innerCalculator == 0) {
+              display.innerHTML = display.innerHTML;
+
+              arithmeticBtnsFirstClick = true;
+            } else if (equalBtnFirstClick) {
+              innerTempMemory.push(Number(display.innerHTML));
+
+              z = innerCalculator *= Number(display.innerHTML);
+              result = z;
+              result = Number(result.toFixed(5));
+              display.innerHTML = result;
+
+              result = 0;
+
+              equalBtnFirstClick = false;
+              arithmeticBtnsFirstClick = false;
+            } else {
+              z *= innerTempMemory[innerTempMemory.length - 1];
+              result = z;
+              result = Number(result.toFixed(5));
+
+              display.innerHTML = result;
+
+              innerCalculator = result;
+
+              arithmeticBtnsFirstClick = false;
+            }
+          } else if (
+            previousArithmeticBtnClicked == "minus" &&
+            equalBtnClicked &&
+            percentBtnClicked
+          ) {
+            if (innerCalculator == 0) {
+              display.innerHTML = display.innerHTML;
+
+              arithmeticBtnsFirstClick = true;
+            } else if (equalBtnFirstClick) {
+              innerTempMemory.push(Number(display.innerHTML));
+
+              z = innerCalculator -= Number(display.innerHTML);
+              result = z;
+              result = Number(result.toFixed(5));
+              display.innerHTML = result;
+
+              result = 0;
+
+              equalBtnFirstClick = false;
+              arithmeticBtnsFirstClick = false;
+            } else {
+              z -= innerTempMemory[innerTempMemory.length - 1];
+              result = z;
+              result = Number(result.toFixed(5));
+
+              display.innerHTML = result;
+
+              innerCalculator = result;
+
+              arithmeticBtnsFirstClick = false;
+            }
+          }
+
+          // if block below prevents displayed result from exceeding display area
+          if (display.innerHTML.length > 16) {
+            display.innerHTML = Number(display.innerHTML).toExponential(4);
+          } else {
+            display.innerHTML = display.innerHTML;
+          }
         }
 
         console.log(btnValue);
