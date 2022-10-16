@@ -30,9 +30,17 @@
         padding: 4px;
         font-size: 30px;
       }
+
+      button.fullScreen {
+        padding: 4px;
+        font-size: 20px;
+      }
     </style>
   </head>
   <body>
+    <div style="display: block">
+      <button class="fullScreen">full screen</button>
+    </div>
     <div id="container">
       <h2 id="practice">this is a practice page</h2>
       <!-- text between -->
@@ -642,6 +650,11 @@
         }
 
         console.log(btnValue);
+      });
+
+      let fullScreenBtn = document.querySelector(".fullScreen");
+      fullScreenBtn.addEventListener("click", () => {
+        document.documentElement.requestFullscreen();
       });
     </script>
   </body>
